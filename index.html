@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building AI Agent Platforms - Blueprint</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;500&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background: #1e3a8a;
+      background-image:
+        radial-gradient(circle at 25% 25%, #3b82f6 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, #1d4ed8 0%, transparent 50%),
+        linear-gradient(45deg, #1e3a8a 0%, #1e40af 100%);
+      color: #ffffff;
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .blueprint-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.1;
+      z-index: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, .1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .1) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .project-number {
+      font-family: 'Orbitron', monospace;
+      font-size: 1rem;
+      color: #60a5fa;
+      letter-spacing: 2px;
+      margin-bottom: 1rem;
+    }
+
+    .main-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 4rem;
+      font-weight: 900;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 1rem;
+      text-shadow: 0 0 20px rgba(96, 165, 250, 0.5);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #93c5fd;
+      margin-bottom: 0.5rem;
+      letter-spacing: 1px;
+    }
+
+    .authors {
+      font-size: 1.1rem;
+      color: #dbeafe;
+      letter-spacing: 1px;
+    }
+
+    .blueprint-section {
+      background: rgba(30, 58, 138, 0.8);
+      border: 2px solid #60a5fa;
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 2rem 0;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .blueprint-section::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: #1e3a8a;
+      color: #60a5fa;
+      padding: 0 1rem;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+    }
+
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem;
+      color: #60a5fa;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .platform-diagram {
+      background: #1e40af;
+      border: 1px solid #60a5fa;
+      border-radius: 8px;
+      padding: 2rem;
+      margin: 2rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .platform-diagram::before {
+      content: 'AI AGENT PLATFORM ARCHITECTURE';
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      background: #1e40af;
+      color: #60a5fa;
+      padding: 0 1rem;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .diagram-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 2rem;
+      align-items: center;
+      margin-top: 2rem;
+    }
+
+    .component-box {
+      background: rgba(96, 165, 250, 0.1);
+      border: 1px solid #60a5fa;
+      border-radius: 4px;
+      padding: 1rem;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .component-box:hover {
+      background: rgba(96, 165, 250, 0.2);
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+    }
+
+    .component-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      color: #93c5fd;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .component-desc {
+      font-size: 0.7rem;
+      color: #dbeafe;
+      line-height: 1.3;
+    }
+
+    .central-core {
+      background: rgba(239, 68, 68, 0.2);
+      border: 2px solid #ef4444;
+      border-radius: 8px;
+      padding: 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .central-core::before {
+      content: '⚡';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e40af;
+      border: 2px solid #ef4444;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px dotted #60a5fa;
+    }
+
+    .spec-label {
+      color: #93c5fd;
+      font-weight: 500;
+    }
+
+    .spec-value {
+      color: #ffffff;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .features-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .features-list li {
+      background: rgba(96, 165, 250, 0.1);
+      border: 1px solid #60a5fa;
+      border-left: 4px solid #ef4444;
+      padding: 1rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .features-list li:hover {
+      background: rgba(96, 165, 250, 0.2);
+      transform: translateX(10px);
+    }
+
+    .features-list li::before {
+      content: '▶';
+      color: #ef4444;
+      margin-right: 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .coming-soon {
+      background: linear-gradient(45deg, #ef4444, #f59e0b);
+      color: #ffffff;
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: inline-block;
+      margin: 1rem 0;
+      animation: pulse 2s infinite;
+      border: 1px solid #ffffff;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        transform: scale(1);
+      }
+
+      50% {
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+        transform: scale(1.05);
+      }
+    }
+
+    .cta-section {
+      background: rgba(15, 23, 42, 0.8);
+      border: 2px solid #ef4444;
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 3rem 0;
+      text-align: center;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+
+    .cta-section::before {
+      content: 'NOTIFICATION SYSTEM';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e3a8a;
+      color: #ef4444;
+      padding: 0 1rem;
+      font-size: 0.8rem;
+      letter-spacing: 2px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .cta-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.8rem;
+      color: #ffffff;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .email-form {
+      display: flex;
+      gap: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+      align-items: stretch;
+    }
+
+    .email-input {
+      flex: 1;
+      padding: 1rem;
+      background: rgba(30, 58, 138, 0.5);
+      border: 1px solid #60a5fa;
+      border-radius: 4px;
+      color: #ffffff;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 0.9rem;
+    }
+
+    .email-input:focus {
+      outline: none;
+      border-color: #ef4444;
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    }
+
+    .email-input::placeholder {
+      color: #93c5fd;
+    }
+
+    .submit-btn {
+      padding: 1rem 2rem;
+      background: linear-gradient(45deg, #ef4444, #dc2626);
+      color: #ffffff;
+      border: 1px solid #ef4444;
+      border-radius: 4px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover {
+      background: linear-gradient(45deg, #dc2626, #b91c1c);
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+      transform: scale(1.05);
+    }
+
+    .social-section {
+      background: rgba(30, 58, 138, 0.6);
+      border: 1px solid #60a5fa;
+      border-radius: 10px;
+      padding: 2rem;
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .social-link {
+      background: rgba(96, 165, 250, 0.2);
+      border: 1px solid #60a5fa;
+      border-radius: 4px;
+      padding: 1rem 1.5rem;
+      color: #60a5fa;
+      text-decoration: none;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .social-link:hover {
+      background: rgba(96, 165, 250, 0.3);
+      border-color: #ef4444;
+      color: #ffffff;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(96, 165, 250, 0.5);
+    }
+
+    .success-message {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 1rem;
+      color: #6ee7b7;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      display: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .book-cover {
+      max-width: 300px;
+      margin: 2rem auto;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 2.5rem;
+      }
+
+      .diagram-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .specs-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .email-form {
+        flex-direction: column;
+        max-width: 100%;
+      }
+
+      .social-links {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+    }
+
+    .technical-drawing {
+      stroke: #60a5fa;
+      fill: none;
+      stroke-width: 1;
+    }
+
+    .highlight-stroke {
+      stroke: #ef4444;
+      stroke-width: 2;
+    }
+
+    .annotation {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 10px;
+      fill: #93c5fd;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="blueprint-grid"></div>
+
+  <div class="container">
+    <div class="header">
+      <div class="coming-soon">Status: In Development</div>
+      <h1 class="main-title">Building AI Agent Platforms</h1>
+      <div class="authors">
+        <div class="social-links">
+          <a href="https://linkedin.com/in/benomahony" class="social-link" target="_blank" rel="noopener">
+            <span>🔗</span> Ben O'Mahony
+          </a>
+          <a href="https://www.linkedin.com/in/fnonnenmacher/" class="social-link" target="_blank" rel="noopener">
+            <span>🔗</span> Fabian Nonnenmacher
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Book Cover -->
+    <div class="book-cover">
+      <img src="./Building_AI_Agent_Platforms.png" alt="Technical Blueprint Cover" width="300" height="400">
+    </div>
+    <!-- Notification System -->
+    <div class="cta-section">
+      <p style="margin-bottom: 2rem; color: #93c5fd;">Register for development updates and release notifications</p>
+
+      <form class="email-form" id="emailForm">
+        <input type="email" class="email-input" placeholder="engineer@company.com" required id="emailInput">
+        <button type="submit" class="submit-btn">Activate</button>
+      </form>
+
+      <div class="success-message" id="successMessage">
+        ✓ Registration Complete - Notification System Active
+      </div>
+    </div>
+    <!-- Platform Architecture Blueprint -->
+    <div class="platform-diagram">
+      <div class="diagram-container">
+        <!-- Input Layer -->
+        <div>
+          <div class="component-box">
+            <div class="component-title">Input Layer</div>
+            <div class="component-desc">API Gateway<br />Request Processing<br />Authentication</div>
+          </div>
+          <br />
+          <div class="component-box">
+            <div class="component-title">Data Ingestion</div>
+            <div class="component-desc">Stream Processing<br />Batch Loading<br />Format Conversion</div>
+          </div>
+        </div>
+
+        <!-- Central Core -->
+        <div class="central-core">
+          <div class="component-title" style="color: #ef4444;">Agent Core Engine</div>
+          <div class="component-desc" style="color: #fecaca;">
+            • Lifecycle Management<br />
+            • Task Orchestration<br />
+            • State Management<br />
+            • Resource Allocation<br />
+            • Performance Monitoring
+          </div>
+        </div>
+
+        <!-- Output Layer -->
+        <div>
+          <div class="component-box">
+            <div class="component-title">Output Layer</div>
+            <div class="component-desc">Response Formatting<br />API Endpoints<br />Webhook Delivery</div>
+          </div>
+          <br />
+          <div class="component-box">
+            <div class="component-title">Analytics</div>
+            <div class="component-desc">Metrics Collection<br />Performance Stats<br />Usage Analytics</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical Specifications -->
+    <div class="blueprint-section">
+      <div class="blueprint-section::before">TECHNICAL SPECIFICATIONS</div>
+      <div class="section-title">System Requirements</div>
+      <div class="specs-grid">
+        <div>
+          <div class="spec-item">
+            <span class="spec-label">Pages:</span>
+            <span class="spec-value">~500 PAGES</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Format:</span>
+            <span class="spec-value">PRINT + DIGITAL</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Level:</span>
+            <span class="spec-value">INTERMEDIATE+</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Publisher:</span>
+            <span class="spec-value">O'REILLY MEDIA</span>
+          </div>
+        </div>
+        <div>
+          <div class="spec-item">
+            <span class="spec-label">Prerequisites:</span>
+            <span class="spec-value">DISTRIBUTED SYSTEMS</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Languages:</span>
+            <span class="spec-value">PYTHON, GO, RUST</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Focus:</span>
+            <span class="spec-value">PRODUCTION SYSTEMS</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Examples:</span>
+            <span class="spec-value">REAL-WORLD CASES</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Set -->
+    <div class="blueprint-section">
+      <div class="blueprint-section::before">FEATURE SPECIFICATIONS</div>
+      <div class="section-title">Core Components Covered</div>
+      <ul class="features-list">
+        <li>Agent Architecture Patterns & Design Principles</li>
+        <li>Lifecycle Management & State Orchestration</li>
+        <li>Performance Optimization & Scaling Techniques</li>
+        <li>Production Deployment & Infrastructure</li>
+        <li>Monitoring, Logging & Observability</li>
+        <li>Security Protocols & Compliance Standards</li>
+        <li>Integration Patterns & API Design</li>
+        <li>Error Handling & Recovery Strategies</li>
+        <li>Load Balancing & Resource Management</li>
+        <li>Testing Frameworks & Quality Assurance</li>
+      </ul>
+    </div>
+
+
+  </div>
+
+  <script>
+    // Email form handling
+    document.getElementById('emailForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById('emailInput').value;
+      if (email) {
+        document.getElementById('emailForm').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'block';
+
+        setTimeout(() => {
+          document.getElementById('emailForm').style.display = 'flex';
+          document.getElementById('successMessage').style.display = 'none';
+          document.getElementById('emailInput').value = '';
+        }, 5000);
+      }
+    });
+
+    // Add some interactive blueprint effects
+    const componentBoxes = document.querySelectorAll('.component-box');
+    componentBoxes.forEach(box => {
+      box.addEventListener('mouseenter', () => {
+        // Add glowing effect
+        box.style.boxShadow = '0 0 25px rgba(96, 165, 250, 0.6)';
+      });
+
+      box.addEventListener('mouseleave', () => {
+        box.style.boxShadow = '';
+      });
+    });
+
+    // Blueprint grid animation
+    let gridOpacity = 0.1;
+    let direction = 1;
+
+    setInterval(() => {
+      gridOpacity += direction * 0.02;
+      if (gridOpacity >= 0.2) direction = -1;
+      if (gridOpacity <= 0.05) direction = 1;
+
+      const grid = document.querySelector('.blueprint-grid');
+      if (grid) grid.style.opacity = gridOpacity;
+    }, 100);
+  </script>
+</body>
+
+</html>
