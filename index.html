@@ -4,310 +4,1014 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Building AI Agent Platforms - Blueprint</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Building AI Agent Platforms - Terminal</title>
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;500&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap"
     rel="stylesheet">
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            'orbitron': ['Orbitron', 'monospace'],
-            'mono': ['Roboto Mono', 'monospace'],
-          },
-          colors: {
-            'blueprint': {
-              'dark': '#1e3a8a',
-              'medium': '#1e40af',
-              'light': '#3b82f6',
-              'accent': '#60a5fa',
-              'text': '#93c5fd',
-              'bright': '#dbeafe'
-            }
-          }
-        }
+  <style>
+    :root {
+      --terminal-bg: #0d1117;
+      --terminal-dark: #161b22;
+      --terminal-border: #30363d;
+      --terminal-text: #c9d1d9;
+      --terminal-green: #7ce38b;
+      --terminal-yellow: #f0d52d;
+      --terminal-red: #ff6b6b;
+      --terminal-blue: #58a6ff;
+      --terminal-purple: #bc8cff;
+      --terminal-cyan: #39c5cf;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--terminal-bg);
+      color: var(--terminal-text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .scanlines::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(0deg,
+          transparent,
+          transparent 2px,
+          rgba(124, 227, 139, 0.03) 2px,
+          rgba(124, 227, 139, 0.03) 4px);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .terminal-window {
+      background: var(--terminal-dark);
+      border: 1px solid var(--terminal-border);
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(124, 227, 139, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--terminal-border);
+    }
+
+    .terminal-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .terminal-control {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .control-red {
+      background: var(--terminal-red);
+    }
+
+    .control-yellow {
+      background: var(--terminal-yellow);
+    }
+
+    .control-green {
+      background: var(--terminal-green);
+    }
+
+    .terminal-title {
+      font-size: 0.875rem;
+      color: var(--terminal-text);
+    }
+
+    .terminal-content {
+      padding: 1.5rem;
+    }
+
+    .ascii-art {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(6px, 1.2vw, 14px);
+      line-height: 1;
+      white-space: pre;
+      color: var(--terminal-green);
+      text-shadow: 0 0 10px var(--terminal-green);
+      text-align: center;
+      margin: 2rem 0;
+      overflow-x: auto;
+      will-change: transform, filter, opacity;
+      transform: translateZ(0);
+      /* Force hardware acceleration */
+    }
+
+    .matrix-rain {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      will-change: contents;
+    }
+
+    .matrix-char {
+      position: absolute;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--terminal-green);
+      opacity: 0.6;
+      animation: matrix-fall linear infinite;
+      will-change: transform, opacity;
+      transform: translateZ(0);
+      /* Force hardware acceleration */
+    }
+
+    @keyframes matrix-fall {
+      0% {
+        transform: translateY(-100vh);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(100vh);
+        opacity: 0;
       }
     }
-  </script>
 
-  <style>
-    .blueprint-grid {
-      background-image:
-        linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
-      background-size: 50px 50px;
-      animation: grid-pulse 10s ease-in-out infinite;
+    .terminal-prompt {
+      margin-bottom: 1rem;
     }
 
-    @keyframes grid-pulse {
+    .prompt-symbol {
+      color: var(--terminal-green);
+      margin-right: 0.5rem;
+    }
+
+    .prompt-command {
+      color: var(--terminal-cyan);
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 16px;
+      background: var(--terminal-green);
+      animation: cursor-blink 1s infinite;
+      margin-left: 2px;
+    }
+
+    @keyframes cursor-blink {
 
       0%,
+      50% {
+        opacity: 1;
+      }
+
+      51%,
       100% {
-        opacity: 0.15;
+        opacity: 0;
+      }
+    }
+
+    .effect-matrix {
+      animation: matrix-effect 3s ease-in-out;
+      will-change: transform, filter;
+    }
+
+    .effect-glitch {
+      animation: glitch-effect 2s ease-in-out;
+      will-change: transform;
+    }
+
+    .effect-decrypt {
+      animation: decrypt-effect 4s ease-in-out;
+      will-change: opacity, filter;
+    }
+
+    .effect-slide {
+      animation: slide-effect 2s ease-in-out;
+      will-change: transform, opacity;
+    }
+
+    @keyframes matrix-effect {
+      0% {
+        filter: blur(20px);
+        transform: scale(1.1) translateZ(0);
       }
 
       50% {
-        opacity: 0.25;
+        filter: blur(5px);
+        transform: scale(1.05) translateZ(0);
       }
+
+      100% {
+        filter: blur(0);
+        transform: scale(1) translateZ(0);
+      }
+    }
+
+    @keyframes glitch-effect {
+
+      0%,
+      100% {
+        transform: translate(0) translateZ(0);
+      }
+
+      10% {
+        transform: translate(-2px, 2px) translateZ(0);
+      }
+
+      20% {
+        transform: translate(2px, -2px) translateZ(0);
+      }
+
+      30% {
+        transform: translate(-2px, -2px) translateZ(0);
+      }
+
+      40% {
+        transform: translate(2px, 2px) translateZ(0);
+      }
+
+      50% {
+        transform: translate(-2px, 2px) translateZ(0);
+      }
+
+      60% {
+        transform: translate(2px, -2px) translateZ(0);
+      }
+
+      70% {
+        transform: translate(-2px, -2px) translateZ(0);
+      }
+
+      80% {
+        transform: translate(2px, 2px) translateZ(0);
+      }
+
+      90% {
+        transform: translate(-2px, 2px) translateZ(0);
+      }
+    }
+
+    @keyframes decrypt-effect {
+      0% {
+        opacity: 0;
+        filter: blur(10px);
+      }
+
+      25% {
+        opacity: 0.3;
+        filter: blur(5px);
+      }
+
+      50% {
+        opacity: 0.6;
+        filter: blur(2px);
+      }
+
+      75% {
+        opacity: 0.8;
+        filter: blur(1px);
+      }
+
+      100% {
+        opacity: 1;
+        filter: blur(0);
+      }
+    }
+
+    @keyframes slide-effect {
+      0% {
+        transform: translateX(-100%) translateZ(0);
+        opacity: 0;
+      }
+
+      100% {
+        transform: translateX(0) translateZ(0);
+        opacity: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .matrix-rain {
+        display: none;
+      }
+
+      .ascii-art {
+        text-shadow: none;
+      }
+    }
+
+    .terminal-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--terminal-dark);
+      border: 1px solid var(--terminal-border);
+      border-radius: 4px;
+      color: var(--terminal-green);
+      text-decoration: none;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+      margin: 0.25rem;
+    }
+
+    .terminal-link:hover {
+      background: var(--terminal-green);
+      color: var(--terminal-bg);
+      border-color: var(--terminal-green);
+    }
+
+    .terminal-button {
+      padding: 0.5rem 1rem;
+      background: var(--terminal-green);
+      color: var(--terminal-bg);
+      border: 1px solid var(--terminal-green);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .terminal-button:hover {
+      background: var(--terminal-text);
+      border-color: var(--terminal-text);
+    }
+
+    .terminal-input {
+      flex: 1;
+      padding: 0.5rem;
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
+      border-radius: 4px;
+      color: var(--terminal-text);
+      font-family: inherit;
+      font-size: 0.875rem;
+    }
+
+    .terminal-input:focus {
+      outline: none;
+      border-color: var(--terminal-green);
+      box-shadow: 0 0 10px rgba(124, 227, 139, 0.3);
+    }
+
+    .terminal-input::placeholder {
+      color: rgba(201, 209, 217, 0.5);
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+
+    .code-block {
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
+      border-radius: 4px;
+      padding: 1rem;
+      font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+
+    .code-block:hover {
+      border-color: var(--terminal-green);
+    }
+
+    .code-comment {
+      color: var(--terminal-yellow);
+      margin-bottom: 0.5rem;
+    }
+
+    .code-class {
+      color: var(--terminal-green);
+      margin-bottom: 0.5rem;
+    }
+
+    .code-content {
+      color: var(--terminal-text);
+      margin-left: 1rem;
+      line-height: 1.4;
+    }
+
+    .spec-line {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      border-bottom: 1px dotted var(--terminal-border);
+    }
+
+    .spec-key {
+      color: var(--terminal-text);
+    }
+
+    .spec-value {
+      color: var(--terminal-green);
+    }
+
+    .feature-item {
+      background: var(--terminal-bg);
+      border: 1px solid var(--terminal-border);
+      border-left: 4px solid var(--terminal-green);
+      padding: 0.75rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+      border-color: var(--terminal-green);
+      transform: translateX(4px);
+    }
+
+    .feature-icon {
+      color: var(--terminal-green);
+      margin-right: 0.5rem;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: linear-gradient(45deg, var(--terminal-red), var(--terminal-yellow));
+      color: white;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      animation: pulse-glow 2s infinite;
     }
 
     @keyframes pulse-glow {
 
       0%,
       100% {
-        box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
-        transform: scale(1);
+        box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
       }
 
       50% {
-        box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
-        transform: scale(1.05);
+        box-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
       }
     }
 
-    .pulse-glow {
-      animation: pulse-glow 2s infinite;
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .form-row {
+        flex-direction: column;
+      }
+
+      .grid-3 {
+        grid-template-columns: 1fr;
+      }
+
+      .ascii-art {
+        font-size: 6px;
+        /* Reduce effects on mobile for performance */
+        text-shadow: 0 0 5px var(--terminal-green);
+      }
+
+      /* Reduce matrix rain on mobile */
+      .matrix-char:nth-child(n+16) {
+        display: none;
+      }
+
+      /* Optimize terminal windows for mobile */
+      .terminal-window {
+        margin-bottom: 1rem;
+      }
+
+      .terminal-content {
+        padding: 1rem;
+      }
+
+      /* Better touch targets */
+      .terminal-link,
+      .terminal-button {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
     }
 
-    .hover-glow:hover {
-      box-shadow: 0 0 25px rgba(96, 165, 250, 0.6);
+    @media (max-width: 480px) {
+      .ascii-art {
+        font-size: 4px;
+        text-shadow: none;
+        /* Remove glow on very small screens */
+      }
+
+      /* Hide particles on very small screens */
+      .matrix-char:nth-child(n+8) {
+        display: none;
+      }
+
+      .scanlines::before {
+        opacity: 0.5;
+        /* Reduce scanlines intensity */
+      }
     }
 
-    .form-response {
-      transition: all 0.3s ease;
+    @media (-webkit-min-device-pixel-ratio: 2),
+    (min-resolution: 192dpi) {
+      .ascii-art {
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
     }
   </style>
 </head>
 
-<body class="font-mono bg-blueprint-dark text-white min-h-screen relative overflow-x-hidden">
-  <!-- Blueprint Grid Background -->
-  <div class="blueprint-grid fixed inset-0 pointer-events-none"></div>
+<body class="scanlines">
+  <div class="matrix-rain" id="matrix-container"></div>
 
-  <!-- Gradient Background -->
-  <div
-    class="fixed inset-0 bg-gradient-to-br from-blueprint-light/30 via-blueprint-dark to-blueprint-medium pointer-events-none">
+  <div class="container">
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="terminal-controls">
+          <div class="terminal-control control-red"></div>
+          <div class="terminal-control control-yellow"></div>
+          <div class="terminal-control control-green"></div>
+        </div>
+        <div class="terminal-title">terminal@baap-book:~$</div>
+      </div>
+      <div class="terminal-content">
+        <div class="terminal-prompt">
+          <span class="prompt-symbol">$</span>
+          <span class="prompt-command" id="typing-command">cat status.txt</span>
+          <span class="cursor"></span>
+        </div>
+        <div style="color: var(--terminal-yellow); margin-bottom: 1rem;">
+          [STATUS] In Development - AI Agent Platform Blueprint
+        </div>
+
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <span class="status-indicator">Status: In Development</span>
+        </div>
+
+        <div class="terminal-prompt">
+          <span class="prompt-symbol">$</span>
+          <span class="prompt-command">./subscribe.sh --updates --releases</span>
+        </div>
+        <p style="margin: 1rem 0; color: var(--terminal-text);">
+          # Register for development updates and release notifications
+        </p>
+
+        <form hx-post="https://app.kit.com/forms/8559415/subscriptions" hx-target="#form-response" hx-swap="innerHTML"
+          class="form-row">
+          <input type="email" name="email_address" placeholder="engineer@company.com" required class="terminal-input">
+          <button type="submit" class="terminal-button">EXECUTE</button>
+        </form>
+
+        <div id="form-response" style="margin-top: 1rem; color: var(--terminal-green);"></div>
+      </div>
+    </div>
+
+    <div class="ascii-art" id="ascii-title">
+ ██████  ██    ██ ██ ██      ██████  ██ ███    ██  ██████  
+ ██   ██ ██    ██ ██ ██      ██   ██ ██ ████   ██ ██       
+ ██████  ██    ██ ██ ██      ██   ██ ██ ██ ██  ██ ██   ███ 
+ ██   ██ ██    ██ ██ ██      ██   ██ ██ ██  ██ ██ ██    ██ 
+ ██████   ██████  ██ ███████ ██████  ██ ██   ████  ██████  
+ █████  ██     █████   ██████  ███████  ███    ██ ████████  
+██   ██ ██    ██   ██ ██       ██       ████   ██    ██     
+███████ ██    ███████ ██   ███ ███████  ██ ██  ██    ██     
+██   ██ ██    ██   ██ ██    ██ ██       ██  ██ ██    ██     
+██   ██ ██    ██   ██  ██████  ███████  ██   ████    ██     
+██████  ██       █████  ████████ ███████  ██████  ██████  ███    ███  ███████ 
+██   ██ ██      ██   ██    ██    ██      ██    ██ ██   ██ ████  ████  ██      
+██████  ██      ███████    ██    █████   ██    ██ ██████  ██ ████ ██  ███████ 
+██      ██      ██   ██    ██    ██      ██    ██ ██   ██ ██  ██  ██       ██ 
+██      ███████ ██   ██    ██    ██       ██████  ██   ██ ██      ██  ███████ 
+    </div>
+
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <a href="https://linkedin.com/in/benomahony" class="terminal-link" target="_blank" rel="noopener">
+        <span>></span> Ben O'Mahony
+      </a>
+      <a href="https://www.linkedin.com/in/fnonnenmacher/" class="terminal-link" target="_blank" rel="noopener">
+        <span>></span> Fabian Nonnenmacher
+      </a>
+    </div>
+
+    <div class="grid grid-2" style="gap: 2rem; align-items: start; margin: 2rem 0;">
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-controls">
+            <div class="terminal-control control-red"></div>
+            <div class="terminal-control control-yellow"></div>
+            <div class="terminal-control control-green"></div>
+          </div>
+          <div class="terminal-title">image_viewer</div>
+        </div>
+        <div class="terminal-content" style="text-align: center;">
+          <img src="./Building_AI_Agent_Platforms.png" alt="Building AI Agent Platforms Book Cover"
+            style="max-width: 100%; height: auto; border: 2px solid var(--terminal-border); border-radius: 4px;">
+        </div>
+      </div>
+
+      <div class="terminal-window">
+        <div class="terminal-header">
+          <div class="terminal-controls">
+            <div class="terminal-control control-red"></div>
+            <div class="terminal-control control-yellow"></div>
+            <div class="terminal-control control-green"></div>
+          </div>
+          <div class="terminal-title">book_info.json</div>
+        </div>
+        <div class="terminal-content">
+          <div class="terminal-prompt">
+            <span class="prompt-symbol">$</span>
+            <span class="prompt-command">cat book_info.json</span>
+          </div>
+          <div style="margin-top: 1rem;">
+            <div class="spec-line">
+              <span class="spec-key">"title":</span>
+              <span class="spec-value">"Building AI Agent Platforms"</span>
+            </div>
+            <div class="spec-line">
+              <span class="spec-key">"publisher":</span>
+              <span class="spec-value">"O'Reilly Media"</span>
+            </div>
+            <div class="spec-line">
+              <span class="spec-key">"pages":</span>
+              <span class="spec-value">"~500"</span>
+            </div>
+            <div class="spec-line">
+              <span class="spec-key">"level":</span>
+              <span class="spec-value">"Intermediate+"</span>
+            </div>
+            <div class="spec-line">
+              <span class="spec-key">"format":</span>
+              <span class="spec-value">"Print + Digital"</span>
+            </div>
+            <div class="spec-line">
+              <span class="spec-key">"focus":</span>
+              <span class="spec-value">"Production Systems"</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="terminal-controls">
+          <div class="terminal-control control-red"></div>
+          <div class="terminal-control control-yellow"></div>
+          <div class="terminal-control control-green"></div>
+        </div>
+        <div class="terminal-title">system_architecture.py</div>
+      </div>
+      <div class="terminal-content">
+        <div class="terminal-prompt">
+          <span class="prompt-symbol">$</span>
+          <span class="prompt-command">python3 architecture.py --display-platform</span>
+        </div>
+
+        <div class="grid grid-3" style="margin-top: 1.5rem;">
+          <div>
+            <div class="code-comment"># INPUT_LAYER</div>
+            <div class="code-block">
+              <div class="code-class">class APIGateway:</div>
+              <div class="code-content">
+                def __init__(self):<br>
+                &nbsp;&nbsp;self.request_processing = True<br>
+                &nbsp;&nbsp;self.authentication = AuthModule()
+              </div>
+            </div>
+            <div class="code-block">
+              <div class="code-class">class DataIngestion:</div>
+              <div class="code-content">
+                def process_stream(self):<br>
+                &nbsp;&nbsp;# Stream Processing<br>
+                &nbsp;&nbsp;# Batch Loading<br>
+                &nbsp;&nbsp;# Format Conversion
+              </div>
+            </div>
+          </div>
+
+          <div
+            style="border: 2px solid var(--terminal-red); border-radius: 8px; padding: 1.5rem; text-align: center; background: var(--terminal-bg);">
+            <div style="color: var(--terminal-red); font-size: 1.2rem; margin-bottom: 1rem;">⚡ AGENT_CORE_ENGINE</div>
+            <div style="font-size: 0.875rem; line-height: 1.4;">
+              <span style="color: var(--terminal-cyan);">></span> lifecycle_management()<br>
+              <span style="color: var(--terminal-cyan);">></span> task_orchestration()<br>
+              <span style="color: var(--terminal-cyan);">></span> state_management()<br>
+              <span style="color: var(--terminal-cyan);">></span> resource_allocation()<br>
+              <span style="color: var(--terminal-cyan);">></span> performance_monitoring()
+            </div>
+          </div>
+
+          <div>
+            <div class="code-comment"># OUTPUT_LAYER</div>
+            <div class="code-block">
+              <div class="code-class">class ResponseHandler:</div>
+              <div class="code-content">
+                def format_output(self):<br>
+                &nbsp;&nbsp;# Response Formatting<br>
+                &nbsp;&nbsp;# API Endpoints<br>
+                &nbsp;&nbsp;# Webhook Delivery
+              </div>
+            </div>
+            <div class="code-block">
+              <div class="code-class">class Analytics:</div>
+              <div class="code-content">
+                def collect_metrics(self):<br>
+                &nbsp;&nbsp;# Performance Stats<br>
+                &nbsp;&nbsp;# Usage Analytics
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="terminal-controls">
+          <div class="terminal-control control-red"></div>
+          <div class="terminal-control control-yellow"></div>
+          <div class="terminal-control control-green"></div>
+        </div>
+        <div class="terminal-title">features.md</div>
+      </div>
+      <div class="terminal-content">
+        <div class="terminal-prompt">
+          <span class="prompt-symbol">$</span>
+          <span class="prompt-command">grep -r "core_components" features.md</span>
+        </div>
+
+        <div class="grid grid-2" style="margin-top: 1.5rem; gap: 1rem;">
+          <div class="feature-item">
+            <span class="feature-icon">></span> Agent Architecture Patterns & Design Principles
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Lifecycle Management & State Orchestration
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Performance Optimization & Scaling Techniques
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Production Deployment & Infrastructure
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Monitoring, Logging & Observability
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Security Protocols & Compliance Standards
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Integration Patterns & API Design
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Error Handling & Recovery Strategies
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Load Balancing & Resource Management
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">></span> Testing Frameworks & Quality Assurance
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="relative z-10 max-w-7xl mx-auto px-4 py-8">
-    <!-- Header -->
-    <header class="text-center mb-4">
-      <div
-        class="inline-block bg-gradient-to-r from-red-500 to-amber-500 text-white px-6 py-2 rounded-full font-orbitron text-sm font-bold uppercase tracking-widest mb-4 border border-white pulse-glow">
-        Status: In Development
-      </div>
+  <script>
+    // Performance-optimized matrix rain effect
+    function createMatrixRain() {
+      const container = document.getElementById('matrix-container');
+      const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
 
-      <h1 class="font-orbitron text-4xl md:text-6xl font-black uppercase tracking-wider mb-4 text-shadow-lg"
-        style="text-shadow: 0 0 20px rgba(96, 165, 250, 0.5);">
-        Building AI Agent Platforms
-      </h1>
+      // Clear existing chars efficiently
+      container.innerHTML = '';
 
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="https://linkedin.com/in/benomahony"
-          class="bg-blueprint-accent/20 border border-blueprint-accent rounded px-6 py-3 text-blueprint-accent font-orbitron text-sm font-medium uppercase tracking-wide hover:bg-blueprint-accent/30 hover:border-red-500 hover:text-white transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
-          target="_blank" rel="noopener">
-          <span>🔗</span> Ben O'Mahony
-        </a>
-        <a href="https://www.linkedin.com/in/fnonnenmacher/"
-          class="bg-blueprint-accent/20 border border-blueprint-accent rounded px-6 py-3 text-blueprint-accent font-orbitron text-sm font-medium uppercase tracking-wide hover:bg-blueprint-accent/30 hover:border-red-500 hover:text-white transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
-          target="_blank" rel="noopener">
-          <span>🔗</span> Fabian Nonnenmacher
-        </a>
-      </div>
-    </header>
+      // Responsive particle count based on screen size
+      const isMobile = window.innerWidth <= 768;
+      const isSmallMobile = window.innerWidth <= 480;
+      const particleCount = isSmallMobile ? 8 : isMobile ? 15 : 30;
 
-    <!-- Book Cover -->
-    <div class="text-center my-8">
-      <img src="./Building_AI_Agent_Platforms.png" alt="Technical Blueprint Cover" class="w-72 h-96 mx-auto">
-    </div>
+      // Create document fragment for better performance
+      const fragment = document.createDocumentFragment();
 
-    <!-- Notification System -->
-    <div class="bg-slate-900/80 border-2 border-red-500 rounded-lg p-8 my-8 text-center backdrop-blur-lg relative">
-      <div
-        class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blueprint-dark text-red-500 px-4 text-xs uppercase tracking-widest font-orbitron">
-        Notification System
-      </div>
+      for (let i = 0; i < particleCount; i++) {
+        const char = document.createElement('div');
+        char.className = 'matrix-char';
+        char.textContent = chars[Math.floor(Math.random() * chars.length)];
+        char.style.left = Math.random() * 100 + '%';
+        char.style.animationDelay = Math.random() * 10 + 's';
+        char.style.animationDuration = (Math.random() * 5 + 8) + 's';
+        fragment.appendChild(char);
+      }
 
-      <p class="text-blueprint-text mb-4">Register for development updates and release notifications</p>
+      container.appendChild(fragment);
+    }
 
-      <form hx-post="https://app.kit.com/forms/8559415/subscriptions" hx-target="#form-response" hx-swap="innerHTML"
-        class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
-        <input type="email" name="email_address" placeholder="engineer@company.com" required
-          class="flex-1 px-4 py-3 bg-blueprint-dark/50 border border-blueprint-accent rounded text-white font-mono text-sm focus:outline-none focus:border-red-500 focus:shadow-[0_0_10px_rgba(239,68,68,0.3)] placeholder-blueprint-text">
-        <button type="submit"
-          class="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white border border-red-500 rounded font-orbitron text-sm font-bold uppercase tracking-wide hover:from-red-600 hover:to-red-700 hover:shadow-lg hover:shadow-red-500/50 transform hover:scale-105 transition-all duration-300">
-          Activate
-        </button>
-      </form>
+    // Optimized ASCII art random effects with performance checks
+    function applyRandomEffect() {
+      // Skip animations if user prefers reduced motion
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+      }
 
-      <div id="form-response" class="form-response mt-4"></div>
-    </div>
+      const asciiElement = document.getElementById('ascii-title');
+      const effects = ['effect-matrix', 'effect-glitch', 'effect-decrypt', 'effect-slide'];
 
-    <!-- Platform Architecture -->
-    <div class="bg-blueprint-medium border border-blueprint-accent rounded-lg p-8 my-8 relative overflow-hidden">
-      <div
-        class="absolute top-3 left-5 bg-blueprint-medium text-blueprint-accent px-4 text-xs uppercase tracking-wide font-orbitron">
-        AI Agent Platform Architecture
-      </div>
+      // Remove existing effects efficiently
+      asciiElement.className = asciiElement.className.replace(/effect-\w+/g, '').trim() + ' ascii-art';
 
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center mt-8">
-        <!-- Input Layer -->
-        <div class="space-y-4">
-          <div
-            class="bg-blueprint-accent/10 border border-blueprint-accent rounded p-4 text-center hover-glow transform hover:scale-105 transition-all duration-300">
-            <div class="font-orbitron text-xs text-blueprint-text uppercase tracking-wide mb-2">Input Layer</div>
-            <div class="text-xs text-blueprint-bright leading-relaxed">
-              API Gateway<br>Request Processing<br>Authentication
-            </div>
-          </div>
-          <div
-            class="bg-blueprint-accent/10 border border-blueprint-accent rounded p-4 text-center hover-glow transform hover:scale-105 transition-all duration-300">
-            <div class="font-orbitron text-xs text-blueprint-text uppercase tracking-wide mb-2">Data Ingestion</div>
-            <div class="text-xs text-blueprint-bright leading-relaxed">
-              Stream Processing<br>Batch Loading<br>Format Conversion
-            </div>
-          </div>
-        </div>
+      // Apply random effect
+      const randomEffect = effects[Math.floor(Math.random() * effects.length)];
+      asciiElement.classList.add(randomEffect);
 
-        <!-- Central Core -->
-        <div class="bg-red-500/20 border-2 border-red-500 rounded-lg p-8 text-center relative">
-          <div
-            class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-blueprint-medium border-2 border-red-500 rounded-full w-8 h-8 flex items-center justify-center text-base">
-            ⚡
-          </div>
-          <div class="font-orbitron text-xs text-red-500 uppercase tracking-wide mb-2">Agent Core Engine</div>
-          <div class="text-xs text-red-200 leading-relaxed">
-            • Lifecycle Management<br>
-            • Task Orchestration<br>
-            • State Management<br>
-            • Resource Allocation<br>
-            • Performance Monitoring
-          </div>
-        </div>
+      // Remove effect after animation with cleanup
+      setTimeout(() => {
+        asciiElement.classList.remove(randomEffect);
+      }, 4000);
+    }
 
-        <!-- Output Layer -->
-        <div class="space-y-4">
-          <div
-            class="bg-blueprint-accent/10 border border-blueprint-accent rounded p-4 text-center hover-glow transform hover:scale-105 transition-all duration-300">
-            <div class="font-orbitron text-xs text-blueprint-text uppercase tracking-wide mb-2">Output Layer</div>
-            <div class="text-xs text-blueprint-bright leading-relaxed">
-              Response Formatting<br>API Endpoints<br>Webhook Delivery
-            </div>
-          </div>
-          <div
-            class="bg-blueprint-accent/10 border border-blueprint-accent rounded p-4 text-center hover-glow transform hover:scale-105 transition-all duration-300">
-            <div class="font-orbitron text-xs text-blueprint-text uppercase tracking-wide mb-2">Analytics</div>
-            <div class="text-xs text-blueprint-bright leading-relaxed">
-              Metrics Collection<br>Performance Stats<br>Usage Analytics
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    // Optimized terminal typing effect with throttling
+    const typingCommands = [
+      'cat status.txt',
+      'ls -la projects/',
+      'grep -r "agent" src/',
+      'docker ps',
+      'tail -f logs/agent.log',
+      'ps aux | grep python',
+      'git log --oneline',
+      'systemctl status agent',
+      'nvidia-smi',
+      'htop',
+      'watch -n 1 "curl -s localhost:8000/health"',
+      'kubectl get pods',
+      'terraform plan',
+      'cargo build --release'
+    ];
 
-    <!-- Technical Specifications -->
-    <div class="bg-blueprint-dark/80 border-2 border-blueprint-accent rounded-lg p-8 my-8 backdrop-blur-lg relative">
-      <div class="absolute -top-3 left-5 bg-blueprint-dark text-blueprint-accent px-4 text-xs uppercase tracking-wide">
-        Technical Specifications
-      </div>
+    let isTyping = false;
 
-      <h2 class="font-orbitron text-xl text-blueprint-accent uppercase tracking-wider mb-4">System Requirements</h2>
+    function updateTypingCommand() {
+      if (isTyping) return;
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="space-y-2">
-          <div class="flex justify-between py-2 border-b border-dotted border-blueprint-accent">
-            <span class="text-blueprint-text font-medium">Pages:</span>
-            <span class="text-white font-orbitron">~500 PAGES</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-dotted border-blueprint-accent">
-            <span class="text-blueprint-text font-medium">Format:</span>
-            <span class="text-white font-orbitron">PRINT + DIGITAL</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-dotted border-blueprint-accent">
-            <span class="text-blueprint-text font-medium">Level:</span>
-            <span class="text-white font-orbitron">INTERMEDIATE+</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-dotted border-blueprint-accent">
-            <span class="text-blueprint-text font-medium">Publisher:</span>
-            <span class="text-white font-orbitron">O'REILLY MEDIA</span>
-          </div>
-        </div>
-        <div class="space-y-2">
-          <div class="flex justify-between py-2 border-b border-dotted border-blueprint-accent">
-            <span class="text-blueprint-text font-medium">Prerequisites:</span>
-            <span class="text-white font-orbitron">DISTRIBUTED SYSTEMS</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-dotted border-blueprint-accent">
-            <span class="text-blueprint-text font-medium">Languages:</span>
-            <span class="text-white font-orbitron">PYTHON, GO, RUST</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-dotted border-blueprint-accent">
-            <span class="text-blueprint-text font-medium">Focus:</span>
-            <span class="text-white font-orbitron">PRODUCTION SYSTEMS</span>
-          </div>
-          <div class="flex justify-between py-2 border-b border-dotted border-blueprint-accent">
-            <span class="text-blueprint-text font-medium">Examples:</span>
-            <span class="text-white font-orbitron">REAL-WORLD CASES</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      const element = document.getElementById('typing-command');
+      if (!element) return;
 
-    <!-- Feature Set -->
-    <div class="bg-blueprint-dark/80 border-2 border-blueprint-accent rounded-lg p-8 my-8 backdrop-blur-lg relative">
-      <div class="absolute -top-3 left-5 bg-blueprint-dark text-blueprint-accent px-4 text-xs uppercase tracking-wide">
-        Feature Specifications
-      </div>
+      isTyping = true;
+      const randomCommand = typingCommands[Math.floor(Math.random() * typingCommands.length)];
 
-      <h2 class="font-orbitron text-xl text-blueprint-accent uppercase tracking-wider mb-4">Core Components Covered</h2>
+      element.textContent = '';
+      let i = 0;
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Agent Architecture Patterns & Design Principles
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Lifecycle Management & State Orchestration
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Performance Optimization & Scaling Techniques
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Production Deployment & Infrastructure
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Monitoring, Logging & Observability
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-action/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Security Protocols & Compliance Standards
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Integration Patterns & API Design
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Error Handling & Recovery Strategies
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Load Balancing & Resource Management
-        </div>
-        <div
-          class="bg-blueprint-accent/10 border border-blueprint-accent border-l-4 border-l-red-500 p-4 hover:bg-blueprint-accent/20 transform hover:translate-x-2 transition-all duration-300">
-          <span class="text-red-500 mr-2">▶</span>Testing Frameworks & Quality Assurance
-        </div>
-      </div>
-    </div>
-  </div>
+      function typeChar() {
+        if (i < randomCommand.length) {
+          element.textContent += randomCommand[i];
+          i++;
+          setTimeout(typeChar, 100);
+        } else {
+          isTyping = false;
+        }
+      }
+
+      typeChar();
+    }
+
+    function createParticles() {
+      if (window.innerWidth <= 768) return;
+
+      const container = document.getElementById('matrix-container');
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 0; i < 10; i++) {
+        const particle = document.createElement('div');
+        particle.style.cssText = `
+          position: absolute;
+          width: 2px;
+          height: 2px;
+          background: #7ce38b;
+          border-radius: 50%;
+          left: ${Math.random() * 100}%;
+          top: ${Math.random() * 100}%;
+          opacity: 0.3;
+          animation: particle-float ${Math.random() * 20 + 10}s linear infinite;
+          will-change: transform, opacity;
+        `;
+        fragment.appendChild(particle);
+      }
+
+      container.appendChild(fragment);
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes particle-float {
+        0% { transform: translate(0, 0) scale(1) translateZ(0); opacity: 0.3; }
+        50% { transform: translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) scale(1.2) translateZ(0); opacity: 0.6; }
+        100% { transform: translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) scale(0.8) translateZ(0); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    document.addEventListener('DOMContentLoaded', function () {
+      requestAnimationFrame(() => {
+        createMatrixRain();
+        createParticles();
+
+        setTimeout(() => {
+          setInterval(applyRandomEffect, 6000);
+        }, 100);
+
+        setTimeout(() => {
+          setInterval(updateTypingCommand, 4000);
+        }, 200);
+
+        setTimeout(() => {
+          setInterval(createMatrixRain, 25000);
+        }, 300);
+
+        setTimeout(applyRandomEffect, 1500);
+        setTimeout(updateTypingCommand, 500);
+      });
+    });
+
+    let lastFrameTime = performance.now();
+    let frameCount = 0;
+
+    function monitorPerformance() {
+      frameCount++;
+      const currentTime = performance.now();
+
+      if (currentTime - lastFrameTime >= 1000) {
+        const fps = frameCount;
+        frameCount = 0;
+        lastFrameTime = currentTime;
+
+        if (fps < 30) {
+          const matrixChars = document.querySelectorAll('.matrix-char');
+          matrixChars.forEach((char, index) => {
+            if (index % 2 === 0) char.style.display = 'none';
+          });
+        }
+      }
+
+      requestAnimationFrame(monitorPerformance);
+    }
+
+    requestAnimationFrame(monitorPerformance);
+  </script>
 </body>
 
 </html>
